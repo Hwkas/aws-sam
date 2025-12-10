@@ -1,0 +1,11 @@
+[project]
+name = "aws-sam"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aws-lambda-powertools>=3.21.0",
+    "aws-sam-cli>=1.145.1",
+    "ruff>=0.14.1",
+]

@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Hello world event handler HTTP API
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.13
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_LOG_LEVEL: INFO
+        POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+        POWERTOOLS_LOGGER_LOG_EVENT: true
+        POWERTOOLS_SERVICE_NAME: example
+
+Resources:
+  # HTTP API (API Gateway v2)
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - "https://example.com"
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Amz-Date
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        MaxAge: 300
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      CodeUri: src
+      Description: API handler function
+      Events:
+        # Catch-all route
+        AnyApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /{proxy+}
+            Method: ANY
+
+        # Specific route for /api/hello
+        GetHello:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/hello
+            Method: GET
+
+        # Swagger UI route
+        SwaggerUI:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /swagger
+            Method: GET
+
+        # Additional specific routes (uncomment as needed)
+        # GetTodoById:
+        #   Type: HttpApi
+        #   Properties:
+        #     ApiId: !Ref HttpApi
+        #     Path: /todos/{todo_id}
+        #     Method: GET
+
+        # CreateTodo:
+        #   Type: HttpApi
+        #   Properties:
+        #     ApiId: !Ref HttpApi
+        #     Path: /todos
+        #     Method: POST
+
+Outputs:
+  HttpApiUrl:
+    Description: URL of the HTTP API
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  
+  HttpApiId:
+    Description: HTTP API ID
+    Value: !Ref HttpApi
