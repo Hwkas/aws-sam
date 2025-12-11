@@ -15,6 +15,25 @@ Globals:
         POWERTOOLS_SERVICE_NAME: example
 
 Resources:
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Python dependencies for the application
+      ContentUri: app/layer_dependencies
+      CompatibleRuntimes:
+        - python3.13
+    Metadata:
+      BuildMethod: python3.13
+  
+  UtilsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Utils for the application
+      ContentUri: app/utils_layer
+      CompatibleRuntimes:
+        - python3.13
+
+
   # HTTP API (API Gateway v2)
   HttpApi:
     Type: AWS::Serverless::HttpApi
@@ -38,8 +57,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      CodeUri: src
+      CodeUri: app/src
       Description: API handler function
+      Layers:
+        - !Ref DependenciesLayer
+        - !Ref UtilsLayer
+      
       Events:
         # Catch-all route
         AnyApiEvent:

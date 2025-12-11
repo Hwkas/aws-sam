@@ -7,5 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "aws-lambda-powertools>=3.21.0",
     "aws-sam-cli>=1.145.1",
+    "awscli>=1.43.13",
     "ruff>=0.14.1",
 ]

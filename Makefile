@@ -21,7 +21,6 @@ run-sam:
 		sam local start-api \
 			-t .aws-sam/build/template.yaml \
 			--port 3000 \
-			--docker-network local-dev-network
 
 clear-docker:
 	docker system prune -a --volumes -f
