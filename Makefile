@@ -1,6 +1,6 @@
 format:
-	ruff check --select I --fix && \
-		ruff format
+	ruff check --select I --fix --config ruff.toml && \
+		ruff format --config ruff.toml
 
 validate-local:
 	sam validate -t sam-template.yaml --lint

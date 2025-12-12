@@ -6,6 +6,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from routes import hello
 
+
 tracer = Tracer()
 app = APIGatewayHttpResolver(enable_validation=True)
 app.include_router(hello.router)
