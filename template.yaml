@@ -2,10 +2,26 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Hello world event handler HTTP API
 
+
+Parameters:
+  PythonRuntime:
+    Type: String
+    Default: python3.13
+    Description: Python runtime version
+  AllowedOrigin:
+    Type: String
+    Default: "https://example.com"
+    Description: Allowed CORS origin
+  CorsMaxAge:
+    Type: Number
+    Default: 300
+    Description: CORS max age in seconds
+
+
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.13
+    Runtime: !Ref PythonRuntime
     Tracing: Active
     Environment:
       Variables:
@@ -14,6 +30,7 @@ Globals:
         POWERTOOLS_LOGGER_LOG_EVENT: true
         POWERTOOLS_SERVICE_NAME: example
 
+
 Resources:
   DependenciesLayer:
     Type: AWS::Serverless::LayerVersion
@@ -21,17 +38,17 @@ Resources:
       Description: Python dependencies for the application
       ContentUri: app/layer_dependencies
       CompatibleRuntimes:
-        - python3.13
+        - !Ref PythonRuntime
     Metadata:
-      BuildMethod: python3.13
-  
+      BuildMethod: !Ref PythonRuntime
+
   UtilsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       Description: Utils for the application
       ContentUri: app/utils_layer
       CompatibleRuntimes:
-        - python3.13
+        - !Ref PythonRuntime
 
 
   # HTTP API (API Gateway v2)
@@ -40,7 +57,7 @@ Resources:
     Properties:
       CorsConfiguration:
         AllowOrigins:
-          - "https://example.com"
+          - !Ref AllowedOrigin
         AllowHeaders:
           - Content-Type
           - Authorization
@@ -51,7 +68,7 @@ Resources:
           - PUT
           - DELETE
           - OPTIONS
-        MaxAge: 300
+        MaxAge: !Ref CorsMaxAge
 
   ApiFunction:
     Type: AWS::Serverless::Function
@@ -62,7 +79,7 @@ Resources:
       Layers:
         - !Ref DependenciesLayer
         - !Ref UtilsLayer
-      
+
       Events:
         # Catch-all route
         AnyApiEvent:
@@ -103,11 +120,12 @@ Resources:
         #     Path: /todos
         #     Method: POST
 
+
 Outputs:
   HttpApiUrl:
     Description: URL of the HTTP API
     Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
-  
+
   HttpApiId:
     Description: HTTP API ID
     Value: !Ref HttpApi
